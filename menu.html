@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Menu – The Food Cart</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --gold: #b8943f;
+    --gold-light: #e8d5a3;
+    --dark: #1a1610;
+    --dark2: #2a2218;
+    --cream: #faf6ef;
+    --text: #3a3020;
+    --muted: #7a6a50;
+    --serif: 'Cormorant Garamond', Georgia, serif;
+    --sans: 'Jost', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--sans); background: var(--cream); color: var(--text); }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(26,22,16,0.97);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 5vw; height: 64px;
+    border-bottom: 1px solid rgba(184,148,63,0.25);
+  }
+  .nav-logo { font-family: var(--serif); color: var(--gold-light); font-size: 22px; font-weight: 600; letter-spacing: 0.04em; text-decoration: none; }
+  .nav-back { color: rgba(232,213,163,0.65); text-decoration: none; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; display: flex; align-items: center; gap: 6px; transition: color 0.2s; }
+  .nav-back:hover { color: var(--gold-light); }
+
+  /* HERO BANNER */
+  .menu-hero {
+    background: linear-gradient(160deg, #1a1610 0%, #2a2218 60%, #1a1610 100%);
+    padding: 120px 5vw 70px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .menu-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 70% 80% at 50% 100%, rgba(184,148,63,0.10) 0%, transparent 70%);
+  }
+  .menu-hero-label { font-size: 11px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; font-weight: 400; }
+  .menu-hero h1 { font-family: var(--serif); font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 600; color: var(--gold-light); line-height: 1.1; margin-bottom: 1rem; }
+  .menu-hero h1 em { font-style: italic; color: var(--gold); }
+  .menu-hero p { color: rgba(232,213,163,0.5); font-size: 15px; font-weight: 300; max-width: 400px; margin: 0 auto; line-height: 1.8; }
+  .hero-divider { width: 48px; height: 1px; background: var(--gold); opacity: 0.6; margin: 1.5rem auto; }
+
+  /* STICKY CATEGORY NAV */
+  .cat-nav {
+    position: sticky; top: 64px; z-index: 90;
+    background: #fff;
+    border-bottom: 1px solid rgba(184,148,63,0.15);
+    padding: 0 5vw;
+    display: flex; gap: 0; overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .cat-nav::-webkit-scrollbar { display: none; }
+  .cat-nav a {
+    text-decoration: none; color: var(--muted);
+    font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 400;
+    padding: 18px 20px; white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+    display: block;
+  }
+  .cat-nav a:hover, .cat-nav a.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+  /* MENU BODY */
+  .menu-body { max-width: 1060px; margin: 0 auto; padding: 70px 5vw 100px; }
+
+  .menu-category { margin-bottom: 70px; }
+  .cat-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2.5rem; }
+  .cat-icon { font-size: 2rem; }
+  .cat-title-wrap {}
+  .cat-label { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--gold); font-weight: 400; }
+  .cat-title { font-family: var(--serif); font-size: 2rem; font-weight: 600; color: var(--text); line-height: 1.1; }
+  .cat-title em { font-style: italic; color: var(--gold); }
+  .cat-line { flex: 1; height: 1px; background: rgba(184,148,63,0.2); }
+
+  /* ITEM CARDS GRID */
+  .items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1px; background: rgba(184,148,63,0.12); }
+
+  .item-card {
+    background: #fff;
+    padding: 1.75rem;
+    display: flex; flex-direction: column; gap: 0.6rem;
+    transition: background 0.2s;
+    position: relative;
+  }
+  .item-card:hover { background: #fdf9f3; }
+
+  .item-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+  .item-name { font-family: var(--serif); font-size: 1.2rem; font-weight: 600; color: var(--text); line-height: 1.2; }
+  .item-price { font-family: var(--serif); font-size: 1.1rem; font-weight: 600; color: var(--gold); white-space: nowrap; }
+  .item-desc { font-size: 13.5px; color: var(--muted); line-height: 1.75; font-weight: 300; }
+
+  .item-footer { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .badge {
+    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 400;
+    padding: 3px 10px; border-radius: 2px;
+  }
+  .badge-veg { background: #edf7ed; color: #2d7a2d; border: 1px solid #b5ddb5; }
+  .badge-nonveg { background: #fdf0ee; color: #a33020; border: 1px solid #f0b8b0; }
+  .badge-popular { background: rgba(184,148,63,0.1); color: var(--gold); border: 1px solid rgba(184,148,63,0.3); }
+  .badge-spicy { background: #fff4ec; color: #c05c20; border: 1px solid #f8c8a8; }
+  .badge-new { background: #eef2ff; color: #3a52c0; border: 1px solid #b8c4f0; }
+
+  /* WIDE ITEM (full-width special item) */
+  .item-card.featured {
+    grid-column: 1 / -1;
+    flex-direction: row; align-items: center; gap: 2rem;
+    background: var(--dark2);
+    padding: 2.5rem;
+  }
+  .item-card.featured .item-name { color: var(--gold-light); font-size: 1.5rem; }
+  .item-card.featured .item-price { color: var(--gold); font-size: 1.3rem; }
+  .item-card.featured .item-desc { color: rgba(232,213,163,0.5); }
+  .item-card.featured .item-top { flex-direction: column; gap: 0.4rem; }
+  .featured-label { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); font-weight: 400; margin-bottom: 0.5rem; }
+  .featured-icon { font-size: 3.5rem; flex-shrink: 0; }
+
+  /* NOTE BAR */
+  .note-bar {
+    background: var(--dark); color: rgba(232,213,163,0.55);
+    text-align: center; padding: 1.5rem 5vw;
+    font-size: 13px; font-weight: 300; line-height: 1.8;
+    border-top: 1px solid rgba(184,148,63,0.12);
+  }
+  .note-bar span { color: var(--gold); }
+
+  /* FOOTER */
+  footer {
+    background: #0f0d0a; padding: 3rem 5vw;
+    display: flex; flex-direction: column; align-items: center; gap: 1rem;
+    border-top: 1px solid rgba(184,148,63,0.1); text-align: center;
+  }
+  footer .logo { font-family: var(--serif); color: var(--gold); font-size: 1.4rem; font-weight: 600; }
+  footer p { color: rgba(232,213,163,0.3); font-size: 13px; font-weight: 300; }
+  .footer-link { color: rgba(184,148,63,0.6); text-decoration: none; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
+  .footer-link:hover { color: var(--gold); }
+
+  @media (max-width: 600px) {
+    .item-card.featured { flex-direction: column; }
+    .featured-icon { font-size: 2.5rem; }
+    .items-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="the_food_cart_website.html" class="nav-logo">The Food Cart</a>
+  <a href="the_food_cart_website.html" class="nav-back">← Back to Home</a>
+</nav>
+
+<!-- HERO -->
+<div class="menu-hero">
+  <p class="menu-hero-label">Mithanpura · Muzaffarpur</p>
+  <h1>Our <em>Menu</em></h1>
+  <div class="hero-divider"></div>
+  <p>Everything made fresh, every single day. Explore our full selection of fast food favourites and street-style delights.</p>
+</div>
+
+<!-- CATEGORY NAV -->
+<nav class="cat-nav">
+  <a href="#burgers" class="active">Burgers</a>
+  <a href="#sandwiches">Sandwiches</a>
+  <a href="#wraps">Wraps</a>
+  <a href="#fries">Fries & Sides</a>
+  <a href="#snacks">Snacks</a>
+  <a href="#beverages">Beverages</a>
+  <a href="#desserts">Desserts</a>
+</nav>
+
+<!-- MENU BODY -->
+<div class="menu-body">
+
+  <!-- BURGERS -->
+  <div class="menu-category" id="burgers">
+    <div class="cat-header">
+      <div class="cat-icon">🍔</div>
+      <div class="cat-title-wrap">
+        <div class="cat-label">Section 01</div>
+        <div class="cat-title">Signature <em>Burgers</em></div>
+      </div>
+      <div class="cat-line"></div>
+    </div>
+    <div class="items-grid">
+      <div class="item-card featured">
+        <div class="featured-icon">🌟</div>
+        <div>
+          <div class="featured-label">Chef's Signature</div>
+          <div class="item-top">
+            <div class="item-name">The Food Cart Special Burger</div>
+            <div class="item-price">₹ 149</div>
+          </div>
+          <p class="item-desc">Our legendary burger — a double-stacked patty, secret sauce, caramelised onions, crispy lettuce, and fresh tomatoes in a toasted brioche-style bun. The one burger that started it all.</p>
+          <div class="item-footer" style="margin-top:0.8rem;">
+            <span class="badge badge-popular">⭐ Most Popular</span>
+            <span class="badge badge-nonveg">Non-Veg</span>
+          </div>
+        </div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Classic Aloo Tikki Burger</div>
+          <div class="item-price">₹ 69</div>
+        </div>
+        <p class="item-desc">Spiced potato patty with mint chutney, onion rings and tangy sauces in a soft sesame bun.</p>
+        <div class="item-footer">
+          <span class="badge badge-veg">Veg</span>
+          <span class="badge badge-popular">⭐ Bestseller</span>
+        </div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Crispy Chicken Burger</div>
+          <div class="item-price">₹ 119</div>
+        </div>
+        <p class="item-desc">Golden fried chicken breast, coleslaw, pickles and our house mayo in a toasted bun.</p>
+        <div class="item-footer">
+          <span class="badge badge-nonveg">Non-Veg</span>
+          <span class="badge badge-spicy">🌶 Spicy</span>
+        </div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Paneer Delight Burger</div>
+          <div class="item-price">₹ 99</div>
+        </div>
+        <p class="item-desc">Grilled paneer with roasted bell peppers, onion and a drizzle of sriracha mayo in a multigrain bun.</p>
+        <div class="item-footer">
+          <span class="badge badge-veg">Veg</span>
+          <span class="badge badge-new">New</span>
+        </div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Double Patty Smash Burger</div>
+          <div class="item-price">₹ 159</div>
+        </div>
+        <p class="item-desc">Two smashed beef-style patties with American cheese, pickles, mustard and ketchup — classic done right.</p>
+        <div class="item-footer">
+          <span class="badge badge-nonveg">Non-Veg</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SANDWICHES -->
+  <div class="menu-category" id="sandwiches">
+    <div class="cat-header">
+      <div class="cat-icon">🥪</div>
+      <div class="cat-title-wrap">
+        <div class="cat-label">Section 02</div>
+        <div class="cat-title">Grilled <em>Sandwiches</em></div>
+      </div>
+      <div class="cat-line"></div>
+    </div>
+    <div class="items-grid">
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Classic Masala Sandwich</div>
+          <div class="item-price">₹ 49</div>
+        </div>
+        <p class="item-desc">Spiced potato and vegetable filling with green chutney in crispy toasted white bread.</p>
+        <div class="item-footer">
+          <span class="badge badge-veg">Veg</span>
+          <span class="badge badge-popular">⭐ Bestseller</span>
+        </div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Cheese Grilled Sandwich</div>
+          <div class="item-price">₹ 65</div>
+        </div>
+        <p class="item-desc">Layers of processed cheese, tomato and capsicum grilled to golden perfection.</p>
+        <div class="item-footer">
+          <span class="badge badge-veg">Veg</span>
+        </div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Club Sandwich</div>
+          <div class="item-price">₹ 99</div>
+        </div>
+        <p class="item-desc">Triple-layered sandwich with fresh veggies, egg, mayo and a generous spread of our house sauce.</p>
+        <div class="item-footer">
+          <span class="badge badge-nonveg">Non-Veg</span>
+        </div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Corn & Cheese Sandwich</div>
+          <div class="item-price">₹ 59</div>
+        </div>
+        <p class="item-desc">Sweet corn kernels mixed with cream cheese and herbs, pressed and grilled.</p>
+        <div class="item-footer">
+          <span class="badge badge-veg">Veg</span>
+          <span class="badge badge-new">New</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WRAPS -->
+  <div class="menu-category" id="wraps">
+    <div class="cat-header">
+      <div class="cat-icon">🌯</div>
+      <div class="cat-title-wrap">
+        <div class="cat-label">Section 03</div>
+        <div class="cat-title">Loaded <em>Wraps</em></div>
+      </div>
+      <div class="cat-line"></div>
+    </div>
+    <div class="items-grid">
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Paneer Tikka Wrap</div>
+          <div class="item-price">₹ 89</div>
+        </div>
+        <p class="item-desc">Chargrilled paneer tikka with fresh onion, coriander chutney and garlic mayo in a soft flour wrap.</p>
+        <div class="item-footer">
+          <span class="badge badge-veg">Veg</span>
+          <span class="badge badge-spicy">🌶 Spicy</span>
+          <span class="badge badge-popular">⭐ Popular</span>
+        </div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Cheesy Veggie Wrap</div>
+          <div class="item-price">₹ 79</div>
+        </div>
+        <p class="item-desc">Sautéed bell peppers, mushrooms, onions and melted cheese wrapped in a warm tortilla.</p>
+        <div class="item-footer">
+          <span class="badge badge-veg">Veg</span>
+        </div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Chicken Kathi Roll</div>
+          <div class="item-price">₹ 109</div>
+        </div>
+        <p class="item-desc">Spiced chicken filling with egg paratha, onion and lime — Kolkata street-style, made fresh.</p>
+        <div class="item-footer">
+          <span class="badge badge-nonveg">Non-Veg</span>
+          <span class="badge badge-popular">⭐ Popular</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FRIES & SIDES -->
+  <div class="menu-category" id="fries">
+    <div class="cat-header">
+      <div class="cat-icon">🍟</div>
+      <div class="cat-title-wrap">
+        <div class="cat-label">Section 04</div>
+        <div class="cat-title">Fries <em>& Sides</em></div>
+      </div>
+      <div class="cat-line"></div>
+    </div>
+    <div class="items-grid">
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Classic Salted Fries</div>
+          <div class="item-price">₹ 49</div>
+        </div>
+        <p class="item-desc">Golden, crispy fries seasoned with sea salt — served hot with ketchup.</p>
+        <div class="item-footer"><span class="badge badge-veg">Veg</span></div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Masala Peri Peri Fries</div>
+          <div class="item-price">₹ 65</div>
+        </div>
+        <p class="item-desc">Crispy fries tossed in our house peri-peri spice blend with a squeeze of lime.</p>
+        <div class="item-footer">
+          <span class="badge badge-veg">Veg</span>
+          <span class="badge badge-spicy">🌶 Spicy</span>
+        </div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Loaded Cheese Fries</div>
+          <div class="item-price">₹ 89</div>
+        </div>
+        <p class="item-desc">Thick-cut fries smothered in warm cheese sauce and jalapeños. Indulgent comfort food.</p>
+        <div class="item-footer">
+          <span class="badge badge-veg">Veg</span>
+          <span class="badge badge-popular">⭐ Popular</span>
+        </div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Onion Rings</div>
+          <div class="item-price">₹ 59</div>
+        </div>
+        <p class="item-desc">Crispy battered onion rings served with a smoky dipping sauce.</p>
+        <div class="item-footer"><span class="badge badge-veg">Veg</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SNACKS -->
+  <div class="menu-category" id="snacks">
+    <div class="cat-header">
+      <div class="cat-icon">🍿</div>
+      <div class="cat-title-wrap">
+        <div class="cat-label">Section 05</div>
+        <div class="cat-title">Street <em>Snacks</em></div>
+      </div>
+      <div class="cat-line"></div>
+    </div>
+    <div class="items-grid">
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Samosa (2 pcs)</div>
+          <div class="item-price">₹ 30</div>
+        </div>
+        <p class="item-desc">Crispy golden samosas filled with spiced potatoes and peas, served with mint chutney.</p>
+        <div class="item-footer">
+          <span class="badge badge-veg">Veg</span>
+          <span class="badge badge-popular">⭐ Favourite</span>
+        </div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Bread Pakora</div>
+          <div class="item-price">₹ 39</div>
+        </div>
+        <p class="item-desc">Spiced potato stuffed between bread slices, dipped in gram flour batter and deep fried.</p>
+        <div class="item-footer"><span class="badge badge-veg">Veg</span></div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Veg Nuggets (6 pcs)</div>
+          <div class="item-price">₹ 69</div>
+        </div>
+        <p class="item-desc">Crispy fried veggie bites seasoned with herbs — great for sharing.</p>
+        <div class="item-footer">
+          <span class="badge badge-veg">Veg</span>
+          <span class="badge badge-new">New</span>
+        </div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Chicken Popcorn (8 pcs)</div>
+          <div class="item-price">₹ 89</div>
+        </div>
+        <p class="item-desc">Bite-sized crispy chicken pieces tossed in seasoned flour and fried golden.</p>
+        <div class="item-footer">
+          <span class="badge badge-nonveg">Non-Veg</span>
+          <span class="badge badge-popular">⭐ Popular</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BEVERAGES -->
+  <div class="menu-category" id="beverages">
+    <div class="cat-header">
+      <div class="cat-icon">🥤</div>
+      <div class="cat-title-wrap">
+        <div class="cat-label">Section 06</div>
+        <div class="cat-title">Cold <em>Beverages</em></div>
+      </div>
+      <div class="cat-line"></div>
+    </div>
+    <div class="items-grid">
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Fresh Lime Soda</div>
+          <div class="item-price">₹ 39</div>
+        </div>
+        <p class="item-desc">Freshly squeezed lime with chilled soda — sweet, salted or masala.</p>
+        <div class="item-footer"><span class="badge badge-veg">Veg</span></div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Cold Coffee</div>
+          <div class="item-price">₹ 59</div>
+        </div>
+        <p class="item-desc">Blended chilled coffee with milk and a scoop of vanilla ice cream.</p>
+        <div class="item-footer">
+          <span class="badge badge-veg">Veg</span>
+          <span class="badge badge-popular">⭐ Popular</span>
+        </div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Mango Shake</div>
+          <div class="item-price">₹ 69</div>
+        </div>
+        <p class="item-desc">Thick, creamy mango milkshake made with real alphonso pulp and chilled milk.</p>
+        <div class="item-footer"><span class="badge badge-veg">Veg</span></div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Strawberry Milkshake</div>
+          <div class="item-price">₹ 69</div>
+        </div>
+        <p class="item-desc">Luscious strawberry shake blended smooth with chilled milk and a dollop of cream.</p>
+        <div class="item-footer"><span class="badge badge-veg">Veg</span></div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Soft Drinks (Canned)</div>
+          <div class="item-price">₹ 35</div>
+        </div>
+        <p class="item-desc">Pepsi, 7UP, Sprite, Mountain Dew — your choice, served chilled.</p>
+        <div class="item-footer"><span class="badge badge-veg">Veg</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DESSERTS -->
+  <div class="menu-category" id="desserts">
+    <div class="cat-header">
+      <div class="cat-icon">🍨</div>
+      <div class="cat-title-wrap">
+        <div class="cat-label">Section 07</div>
+        <div class="cat-title">Sweet <em>Endings</em></div>
+      </div>
+      <div class="cat-line"></div>
+    </div>
+    <div class="items-grid">
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Chocolate Brownie</div>
+          <div class="item-price">₹ 59</div>
+        </div>
+        <p class="item-desc">Warm, fudgy chocolate brownie — served as-is or with a scoop of vanilla ice cream.</p>
+        <div class="item-footer">
+          <span class="badge badge-veg">Veg</span>
+          <span class="badge badge-popular">⭐ Favourite</span>
+        </div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Ice Cream Scoop</div>
+          <div class="item-price">₹ 39</div>
+        </div>
+        <p class="item-desc">Single scoop — choose from vanilla, chocolate, strawberry or butterscotch.</p>
+        <div class="item-footer"><span class="badge badge-veg">Veg</span></div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Gulab Jamun (2 pcs)</div>
+          <div class="item-price">₹ 35</div>
+        </div>
+        <p class="item-desc">Soft, syrup-soaked gulab jamuns — the classic Indian sweet ending to your meal.</p>
+        <div class="item-footer"><span class="badge badge-veg">Veg</span></div>
+      </div>
+      <div class="item-card">
+        <div class="item-top">
+          <div class="item-name">Choco Lava Cake</div>
+          <div class="item-price">₹ 79</div>
+        </div>
+        <p class="item-desc">Mini chocolate cake with a molten dark chocolate centre — best eaten warm.</p>
+        <div class="item-footer">
+          <span class="badge badge-veg">Veg</span>
+          <span class="badge badge-new">New</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end menu-body -->
+
+<!-- NOTE BAR -->
+<div class="note-bar">
+  All prices are inclusive of taxes. <span>Menu and prices are subject to change.</span> Please inform our staff of any allergies before ordering.
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo">The Food Cart</div>
+  <p>Taste of Happiness · Mithanpura, Muzaffarpur, Bihar</p>
+  <div style="display:flex; gap:2rem; margin-top:0.5rem;">
+    <a href="the_food_cart_website.html" class="footer-link">← Home</a>
+    <a href="https://maps.app.goo.gl/mSDyLebu8g2tJh418" class="footer-link" target="_blank">Google Maps ↗</a>
+  </div>
+  <p style="margin-top:0.5rem;">© 2026 The Food Cart. All rights reserved.</p>
+</footer>
+
+<script>
+  const sections = document.querySelectorAll('.menu-category');
+  const navLinks = document.querySelectorAll('.cat-nav a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 130) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+    });
+  });
+</script>
+</body>
+</html>
